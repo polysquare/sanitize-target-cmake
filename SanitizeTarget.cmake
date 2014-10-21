@@ -96,7 +96,7 @@ function (_sanitizer_add_flags FLAGS_ADD_RETURN)
             set (${FLAGS_ADD_RETURN}
                  "${${FLAGS_ADD_RETURN}} ${ADD_FLAGS_ADDITIONAL_FLAG_SWITCH}"
                  PARENT_SCOPE)
-            set (POLYSQUARE_HAVE_${ADD_FLAGS_ADDITIONAL_FLAG_LONG_NAME} TRUE
+            set (SANITIZERS_HAVE_${ADD_FLAGS_ADDITIONAL_FLAG_LONG_NAME} TRUE
                  PARENT_SCOPE)
 
         endif (HAVE_${ADD_FLAGS_ADDITIONAL_FLAG_LONG_NAME})

@@ -32,6 +32,7 @@ set (SANITIZE_INITIAL_CACHE_CONTENTS
      "     \"${CMAKE_GENERATOR}\"\n"
      "     CACHE STRING \"\" FORCE)\n")
 
+
 set (CMAKE_MODULE_PATH
      ${CMAKE_UNIT_DIRECTORY}
      ${SANITIZE_CMAKE_DIRECTORY}
@@ -76,12 +77,12 @@ if (SANITIZERS_USE_MSAN)
     add_cmake_build_test (CreateMSanInstrumentedBinary
                           CreateMSanInstrumentedBinaryVerify)
 
-    if (POLYSQUARE_HAVE_SANITIZE_MEMORY_TRACK_ORIGINS)
+    if (SANITIZERS_HAVE_SANITIZE_MEMORY_TRACK_ORIGINS)
 
         add_cmake_build_test (MSanInstrumentedBinaryTracksOrigins
                               MSanInstrumentedBinaryTracksOriginsVerify)
 
-    endif (POLYSQUARE_HAVE_SANITIZE_MEMORY_TRACK_ORIGINS)
+    endif (SANITIZERS_HAVE_SANITIZE_MEMORY_TRACK_ORIGINS)
 
 endif (SANITIZERS_USE_MSAN)
 
@@ -90,19 +91,19 @@ if (SANITIZERS_USE_UBSAN)
     add_cmake_build_test (CreateUBSanInstrumentedBinary
                           CreateUBSanInstrumentedBinaryVerify)
 
-    if (POLYSQUARE_HAVE_UBSAN_UNSIGNED_INTEGER_OVERFLOW)
+    if (SANITIZERS_HAVE_UBSAN_UNSIGNED_INTEGER_OVERFLOW)
 
         add_cmake_build_test (UBSanInstrumentedBinaryUnsignedIntOverflow
                               UBSanInstrumentedBinaryUnsignedIntOverflowVerify)
 
-    endif (POLYSQUARE_HAVE_UBSAN_UNSIGNED_INTEGER_OVERFLOW)
+    endif (SANITIZERS_HAVE_UBSAN_UNSIGNED_INTEGER_OVERFLOW)
 
-    if (POLYSQUARE_HAVE_UBSAN_NO_SANITIZE_RECOVER)
+    if (SANITIZERS_HAVE_UBSAN_NO_SANITIZE_RECOVER)
 
         add_cmake_build_test (UBSanInstrumentedBinaryNoRecover
                               UBSanInstrumentedBinaryNoRecoverVerify)
 
-    endif (POLYSQUARE_HAVE_UBSAN_NO_SANITIZE_RECOVER)
+    endif (SANITIZERS_HAVE_UBSAN_NO_SANITIZE_RECOVER)
 
 
 endif (SANITIZERS_USE_UBSAN)
