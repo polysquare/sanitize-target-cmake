@@ -1,6 +1,6 @@
 [submodule "sanitizers-cmake"]
 	path = sanitizers-cmake
-	url = git://github.com/smspillaz/sanitizers-cmake
+	url = git://github.com/arsenm/sanitizers-cmake
 [submodule "cmake-unit"]
 	path = cmake-unit
 	url = git://github.com/polysquare/cmake-unit
