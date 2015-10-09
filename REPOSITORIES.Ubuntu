@@ -1,0 +1,3 @@
+http://llvm.org/apt/precise/ llvm-toolchain-snapshot main
+{launchpad}/ubuntu-toolchain-r/test {release} main
+
