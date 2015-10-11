@@ -1,4 +1,4 @@
 sanitize-target-cmake
 =====================
 
-Add sanitisation checks to a target, CMake macro
+Add sanitization checks to a target, CMake macro

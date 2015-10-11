@@ -3,25 +3,23 @@
 # CMake macro to add sanitization checks to a target. Because sanitization
 # checks cannot be added concurrently with each other, a separate
 # binary is added for each sanitization check added, for instance
-# TARGET_msan, TARGET_ubsan. These will be added as dependencies to the
+# ${TARGET}_msan, ${TARGET}_ubsan. These will be added as dependencies to the
 # ALL target by default, or an ALL_msan, ALL_ubsan, etc target by option.
 #
-# See LICENCE.md for Copyright information.
+# See /LICENCE.md for Copyright information
 
-set (SANITIZERS_CMAKE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+set (SANITIZERS_CMAKE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
 
 set (CMAKE_MODULE_PATH
-     ${CMAKE_MODULE_PATH}
-     ${SANITIZERS_CMAKE_DIRECTORY}/tooling-cmake-util
-     ${SANITIZERS_CMAKE_DIRECTORY}/parallel-build-target-utils
-     ${SANITIZERS_CMAKE_DIRECTORY}/sanitizers-cmake)
+     "${CMAKE_MODULE_PATH}"
+     "${SANITIZERS_CMAKE_DIRECTORY}/sanitizers-cmake")
 
 include (CheckCXXCompilerFlag)
 include (CMakeParseArguments)
-include (PolysquareToolingUtil)
-include (ParallelBuildTargetUtils)
+include ("smspillaz/tooling-cmake-util/PolysquareToolingUtil")
+include ("smspillaz/cmake-multi-targets/ParallelBuildTargetUtils")
 
-function (_bootstrap_sanitizer)
+function (_psq_bootstrap_sanitizer)
 
     set (BOOTSTRAP_SANITIZER_SINGLEVAR_ARGS
          SHORT_NAME
@@ -38,7 +36,7 @@ function (_bootstrap_sanitizer)
     set (OPTION_DESC
          "Create ${BOOT_SANITIZER_DESCRIPTION} instrumented binaries (ending "
          "with _${BOOT_SANITIZER_SUFFIX})")
-    string (REPLACE ";" "" OPTION_DESC  "${OPTION_DESC}")
+    string (REPLACE ";" "" OPTION_DESC "${OPTION_DESC}")
     option (SANITIZERS_USE_${BOOT_SANITIZER_SHORT_NAME} "${OPTION_DESC}" OFF)
 
     if (SANITIZERS_USE_${BOOT_SANITIZER_SHORT_NAME})
@@ -51,24 +49,24 @@ function (_bootstrap_sanitizer)
             set (SANITIZER_STATUS
                  "supported: ${${BOOT_SANITIZER_LONG_NAME}_FLAG}")
 
-        else (HAVE_${BOOT_SANITIZER_LONG_NAME})
+        else ()
 
             set (SANITIZER_STATUS "not supported")
             set (SANITIZERS_USE_${BOOT_SANITIZER_SHORT_NAME} OFF PARENT_SCOPE)
 
-        endif (HAVE_${BOOT_SANITIZER_LONG_NAME})
+        endif ()
 
-    else (SANITIZERS_USE_${BOOT_SANITIZER_SHORT_NAME})
+    else ()
 
         set (SANITIZER_STATUS "disabled")
 
-    endif (SANITIZERS_USE_${BOOT_SANITIZER_SHORT_NAME})
+    endif ()
 
     message (STATUS "${BOOT_SANITIZER_DESCRIPTION} ${SANITIZER_STATUS}")
 
-endfunction (_bootstrap_sanitizer)
+endfunction ()
 
-function (_sanitizer_add_flags FLAGS_ADD_RETURN)
+function (_psq_sanitizer_add_flags FLAGS_ADD_RETURN)
 
     set (ADD_FLAGS_SINGLEVAR_ARGS
          SHORT_NAME
@@ -99,22 +97,26 @@ function (_sanitizer_add_flags FLAGS_ADD_RETURN)
             set (SANITIZERS_HAVE_${ADD_FLAGS_ADDITIONAL_FLAG_LONG_NAME} TRUE
                  PARENT_SCOPE)
 
-        endif (HAVE_${ADD_FLAGS_ADDITIONAL_FLAG_LONG_NAME})
+        endif ()
 
-    endif (SANITIZERS_USE_${ADD_FLAGS_SHORT_NAME})
+    endif ()
 
-endfunction (_sanitizer_add_flags FLAGS_ADD_RETURN)
+endfunction ()
 
-function (_add_sanitizer_to_target)
+set (_SANITIZERS_OPTION_ARGS NO_ASAN
+                             NO_MSAN
+                             NO_TSAN
+                             NO_UBSAN)
+
+function (_psq_add_sanitizer_to_target)
 
     set (ADD_SANITIZER_OPTION_ARGS
-         ${_ALL_POLYSQUARE_SANITIZATION_OPTION_ARGS})
+         ${_SANITIZERS_OPTION_ARGS})
     set (ADD_SANITIZER_SINGLEVAR_ARGS
          SHORT_NAME
          SUFFIX
          TARGET)
     set (ADD_SANITIZER_MUTLIVAR_ARGS
-         ${_ALL_POLYSQUARE_SANITIZATION_MULTIVAR_ARGS}
          COMPILE_FLAGS
          LINK_FLAGS)
 
@@ -138,15 +140,12 @@ function (_add_sanitizer_to_target)
     psq_create_mirrored_build_target (${TARGET} ${ADD_SANITIZER_SUFFIX}
                                       ${MIRRORED_BUILD_FORWARD_OPTIONS})
 
-endfunction (_add_sanitizer_to_target)
+endfunction ()
 
-function (sanitizer_add_sanitization_to_target TARGET)
+function (psq_sanitizer_add_sanitization_to_target TARGET)
 
     set (SANITIZATION_OPTION_ARGS
-         NO_ASAN
-         NO_MSAN
-         NO_TSAN
-         NO_UBSAN)
+         ${_SANITIZERS_OPTION_ARGS})
 
     cmake_parse_arguments (SANITIZATION
                            "${SANITIZATION_OPTION_ARGS}"
@@ -164,74 +163,77 @@ function (sanitizer_add_sanitization_to_target TARGET)
 
     # The C and CXX flags for sanitizers appear to be the same, so just
     # use the CXX flags for now.
-    _add_sanitizer_to_target (SHORT_NAME ASAN
-                              SUFFIX asan
-                              TARGET ${TARGET}
-                              COMPILE_FLAGS ${CMAKE_CXX_FLAGS_ASAN}
-                              LINK_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_ASAN}
-                              ${SANITIZER_FORWARD_OPTIONS})
-    _add_sanitizer_to_target (SHORT_NAME MSAN
-                              SUFFIX msan
-                              TARGET ${TARGET}
-                              COMPILE_FLAGS ${POLYSQUARE_MSAN_FLAGS}
-                              LINK_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_MSAN}
-                              ${SANITIZER_FORWARD_OPTIONS})
-    _add_sanitizer_to_target (SHORT_NAME UBSAN
-                              SUFFIX ubsan
-                              TARGET ${TARGET}
-                              COMPILE_FLAGS ${POLYSQUARE_UBSAN_FLAGS}
-                              LINK_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_UBSAN}
-                              ${SANITIZER_FORWARD_OPTIONS})
-    _add_sanitizer_to_target (SHORT_NAME TSAN
-                              SUFFIX tsan
-                              TARGET ${TARGET}
-                              COMPILE_FLAGS ${CMAKE_CXX_FLAGS_TSAN}
-                              LINK_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_TSAN}
-                              ${SANITIZER_FORWARD_OPTIONS})
+    _psq_add_sanitizer_to_target (SHORT_NAME ASAN
+                                  SUFFIX asan
+                                  TARGET ${TARGET}
+                                  COMPILE_FLAGS ${CMAKE_CXX_FLAGS_ASAN}
+                                  LINK_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_ASAN}
+                                  ${SANITIZER_FORWARD_OPTIONS})
+    _psq_add_sanitizer_to_target (SHORT_NAME MSAN
+                                  SUFFIX msan
+                                  TARGET ${TARGET}
+                                  COMPILE_FLAGS ${POLYSQUARE_MSAN_FLAGS}
+                                  LINK_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_MSAN}
+                                  ${SANITIZER_FORWARD_OPTIONS})
+    _psq_add_sanitizer_to_target (SHORT_NAME UBSAN
+                                  SUFFIX ubsan
+                                  TARGET ${TARGET}
+                                  COMPILE_FLAGS ${POLYSQUARE_UBSAN_FLAGS}
+                                  LINK_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_UBSAN}
+                                  ${SANITIZER_FORWARD_OPTIONS})
+    _psq_add_sanitizer_to_target (SHORT_NAME TSAN
+                                  SUFFIX tsan
+                                  TARGET ${TARGET}
+                                  COMPILE_FLAGS ${CMAKE_CXX_FLAGS_TSAN}
+                                  LINK_FLAGS ${CMAKE_SHARED_LINKER_FLAGS_TSAN}
+                                  ${SANITIZER_FORWARD_OPTIONS})
 
-endfunction (sanitizer_add_sanitization_to_target)
+endfunction ()
 
-# Bootstrap all the sanitizers
-_bootstrap_sanitizer (SHORT_NAME ASAN
-                      LONG_NAME ADDRESS_SANITIZER
-                      PACKAGE_NAME ASan
-                      DESCRIPTION AddressSanitizer
-                      SUFFIX asan)
-_bootstrap_sanitizer (SHORT_NAME MSAN
-                      LONG_NAME MEMORY_SANITIZER
-                      PACKAGE_NAME MSan
-                      DESCRIPTION MemorySanitizer
-                      SUFFIX msan)
-_bootstrap_sanitizer (SHORT_NAME UBSAN
-                      LONG_NAME UNDEFINED_BEHAVIOR_SANITIZER
-                      PACKAGE_NAME UBSan
-                      DESCRIPTION UndefinedBehaviourSanitizer
-                      SUFFIX ubsan)
-_bootstrap_sanitizer (SHORT_NAME TSAN
-                      LONG_NAME THREAD_SANITIZER
-                      PACKAGE_NAME TSan
-                      DESCRIPTION ThreadSanitizer
-                      SUFFIX tsan)
+if (NOT CMAKE_SCRIPT_MODE_FILE)
 
-# MemorySanitizer-specific options
-_sanitizer_add_flags (POLYSQUARE_MSAN_FLAGS_ADD
-                      SHORT_NAME MSAN
-                      ADDITIONAL_FLAG_SWITCH
-                      "-fsanitize-memory-track-origins=2"
-                      ADDITIONAL_FLAG_LONG_NAME
-                      SANITIZE_MEMORY_TRACK_ORIGINS)
+    # Bootstrap all the sanitizers
+    _psq_bootstrap_sanitizer (SHORT_NAME ASAN
+                              LONG_NAME ADDRESS_SANITIZER
+                              PACKAGE_NAME ASan
+                              DESCRIPTION AddressSanitizer
+                              SUFFIX asan)
+    _psq_bootstrap_sanitizer (SHORT_NAME MSAN
+                              LONG_NAME MEMORY_SANITIZER
+                              PACKAGE_NAME MSan
+                              DESCRIPTION MemorySanitizer
+                              SUFFIX msan)
+    _psq_bootstrap_sanitizer (SHORT_NAME UBSAN
+                              LONG_NAME UNDEFINED_BEHAVIOR_SANITIZER
+                              PACKAGE_NAME UBSan
+                              DESCRIPTION UndefinedBehaviourSanitizer
+                              SUFFIX ubsan)
+    _psq_bootstrap_sanitizer (SHORT_NAME TSAN
+                              LONG_NAME THREAD_SANITIZER
+                              PACKAGE_NAME TSan
+                              DESCRIPTION ThreadSanitizer
+                              SUFFIX tsan)
 
-# UndefinedBehaviourSanitizer-specific options
-_sanitizer_add_flags (POLYSQUARE_UBSAN_FLAGS_ADD
-                      SHORT_NAME UBSAN
-                      ADDITIONAL_FLAG_SWITCH
-                      "-fsanitize=unsigned-integer-overflow"
-                      ADDITIONAL_FLAG_LONG_NAME
-                      UBSAN_UNSIGNED_INTEGER_OVERFLOW)
-_sanitizer_add_flags (POLYSQUARE_UBSAN_FLAGS_ADD
-                      SHORT_NAME UBSAN
-                      ADDITIONAL_FLAG_SWITCH
-                      "-fno-sanitize-recover"
-                      ADDITIONAL_FLAG_LONG_NAME
-                      UBSAN_NO_SANITIZE_RECOVER)
+    # MemorySanitizer-specific options
+    _psq_sanitizer_add_flags (POLYSQUARE_MSAN_FLAGS_ADD
+                              SHORT_NAME MSAN
+                              ADDITIONAL_FLAG_SWITCH
+                              "-fsanitize-memory-track-origins=2"
+                              ADDITIONAL_FLAG_LONG_NAME
+                              SANITIZE_MEMORY_TRACK_ORIGINS)
 
+    # UndefinedBehaviourSanitizer-specific options
+    _psq_sanitizer_add_flags (POLYSQUARE_UBSAN_FLAGS_ADD
+                              SHORT_NAME UBSAN
+                              ADDITIONAL_FLAG_SWITCH
+                              "-fsanitize=unsigned-integer-overflow"
+                              ADDITIONAL_FLAG_LONG_NAME
+                              UBSAN_UNSIGNED_INTEGER_OVERFLOW)
+    _psq_sanitizer_add_flags (POLYSQUARE_UBSAN_FLAGS_ADD
+                              SHORT_NAME UBSAN
+                              ADDITIONAL_FLAG_SWITCH
+                              "-fno-sanitize-recover"
+                              ADDITIONAL_FLAG_LONG_NAME
+                              UBSAN_NO_SANITIZE_RECOVER)
+
+endif ()
