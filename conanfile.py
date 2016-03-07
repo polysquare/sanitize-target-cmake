@@ -2,7 +2,7 @@ from conans import ConanFile
 from conans.tools import download, unzip
 import os
 
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 
 
 class SanitizeTargetCMakeConan(ConanFile):
@@ -13,7 +13,7 @@ class SanitizeTargetCMakeConan(ConanFile):
                 "cmake-multi-targets/master@smspillaz/cmake-multi-targets",
                 "tooling-cmake-util/master@smspillaz/tooling-cmake-util",
                 "cmake-unit/master@smspillaz/cmake-unit",
-                "sanitizers-cmake/0.0.1@smspillaz/sanitizers-cmake")
+                "sanitizers-cmake/0.0.2@smspillaz/sanitizers-cmake")
     url = "http://github.com/polysquare/sanitize-target-cmake"
     license = "MIT"
 
