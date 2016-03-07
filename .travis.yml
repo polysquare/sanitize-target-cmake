@@ -13,24 +13,33 @@ env:
   global:
   - CXX="clang++"
   - CC="clang"
+  - secure: yIS/0FWYjVe/5oSxAWXQXEXkXNCvo9v1b3PW0Hs+EaVY7p0epM939ZJR0KJdAlJv9OJESFubPifkqUBemqk1acLOoZsaH7MwaiBYEYThhC0ssSBClYt/TOs9RzWdTnSyiwj5vr0Z9zH+jOCdXMU3ci8AKOUbCvL0iDfxCQMFTkA=
+  - secure: AVfRq/yoTToeAuuiDQ9mbyILDQdK92n3E8RHnPtfUAi+1oLXk9v8EmAsh573QKiZkoqX9DvFAyGySa/Z8i3YX4oeov5hH8b2LR4psJfe/V73ffbzOxBWInaXCEIghYzCzfqc52i+vGG2fn8kGWrZB+nTXO3slKcMTJm1CasOA6k=
+  - secure: RZsmL7cmGxbeXWbQjCabLyjvNjLJbYEJ1O98+xNIUXPYe4atq8VTM6FhyPsOPBpSOa95U4w01Xn5feeLeoXpYVzH24UkjGsGF4CNUG9t8CEUYWmeF00E1iEgmwykUpyXsLVX+Kop//M4jdMQb4KuXw4FH8tx93+XV+adRUeIy2A=
+addons:
+  apt:
+    sources:
+    - deadsnakes
+    packages:
+    - python3.4-dev
 install:
-- eval $(curl -LSs --retry 100 --connect-timeout 3 public-travis-scripts.polysquare.org/bootstrap.py | python /dev/stdin -d container -s setup/bii/setup.py -e bash -p /dev/stdout --cmake-version ${CMAKE_VERSION})
+- eval $(curl -LSs --retry 100 --connect-timeout 3 public-travis-scripts.polysquare.org/bootstrap.py
+  | python /dev/stdin -d container -s setup/conan/setup.py -e bash -p /dev/stdout
+  --cmake-version ${CMAKE_VERSION})
 script:
-- polysquare_run check/bii/check.py ${COVERAGE} --cmake-namespace psq --generator "${CMAKE_GENERATOR}" --lint-exclude "*sanitizers-cmake*" --block "smspillaz/sanitize-target-cmake"
+- polysquare_run check/conan/check.py ${COVERAGE} --cmake-namespace psq --generator
+  "${CMAKE_GENERATOR}"
 before_cache:
 - polysquare_cleanup
 after_success:
-- polysquare_run coverage/bii/coverage.py
+- polysquare_run coverage/conan/coverage.py
 before_deploy:
-- polysquare_run deploy/bii/deploy.py
+- polysquare_run deploy/conan/before_deploy.py --package="sanitize-target-cmake"
 deploy:
-  provider: biicode
+  provider: script
+  script: "./travis-deploy"
   skip_cleanup: true
-  user:
-    secure: lXJzmhgnQx7UvAM2dmxlO//dgo1xnQu3tL6/9kplLxmhx1sm7Kt3EhinFKc/RAYgLeUvlcmOXVg//OuYQ579tZA7SsbQEnaoMnlmZyIX1y8gPIHCcefixzvRog1dIpjgq87IfpWF/MoG0z7GzU0EG9TNeI1EemBoUYcJUKRuxzA=
-  password:
-    secure: mrZBzOt7KnEXW0O0t1bV5OxzQ1l6NmYsyzgKGy0RngsVyHUjPiYoWHzNlgq1a3ACcEDAeukrRxS2fb5oCXqaF3XoelPZuBPoMA1yLWdN3794iPSHb++MGH4RD412oDr6oR/AM/OVqB72JxnTh8u13ivWzubVjNd+aLjNG8S7ubs=
   on:
     repo: polysquare/sanitize-target-cmake
     branch: master
-    condition: ${DEPLOY} = 1
+    condition: "${DEPLOY} = 1"
