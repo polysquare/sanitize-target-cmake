@@ -8,16 +8,10 @@
 #
 # See /LICENCE.md for Copyright information
 
-set (SANITIZERS_CMAKE_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
-
-set (CMAKE_MODULE_PATH
-     "${CMAKE_MODULE_PATH}"
-     "${SANITIZERS_CMAKE_DIRECTORY}/sanitizers-cmake")
-
 include (CheckCXXCompilerFlag)
 include (CMakeParseArguments)
-include ("smspillaz/tooling-cmake-util/PolysquareToolingUtil")
-include ("smspillaz/cmake-multi-targets/ParallelBuildTargetUtils")
+include ("cmake/tooling-cmake-util/PolysquareToolingUtil")
+include ("cmake/cmake-multi-targets/ParallelBuildTargetUtils")
 
 function (_psq_bootstrap_sanitizer)
 
