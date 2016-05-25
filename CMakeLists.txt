@@ -19,7 +19,7 @@ set (SANITIZERS_USE_MSAN ON CACHE FORCE "")
 set (SANITIZERS_USE_TSAN ON CACHE FORCE "")
 set (SANITIZERS_USE_UBSAN ON CACHE FORCE "")
 
-include ("cmake/cmake-module-common/Common")
+include ("cmake/cmake-module-common/Common" OPTIONAL)
 include (SanitizeTarget)
 
 # If SANITIZERS_USE_ASAN is set to ON and include (SanitizeTarget)
@@ -444,6 +444,10 @@ set (MARKDOWN_FILES
      "${CMAKE_CURRENT_LIST_DIR}/LICENCE.md"
      "${CMAKE_CURRENT_LIST_DIR}/README.md")
 
-cmake_module_add_common_targets (NAMESPACE "psq"
-                                 CMAKE_FILES ${CMAKE_FILES}
-                                 DOCUMENTATION_FILES ${MARKDOWN_FILES})
+if (COMMAND cmake_module_add_common_targets)
+
+    cmake_module_add_common_targets (NAMESPACE "psq"
+                                     CMAKE_FILES ${CMAKE_FILES}
+                                     DOCUMENTATION_FILES ${MARKDOWN_FILES})
+
+endif ()
