@@ -11,6 +11,7 @@ fsanitize
 NO_ASAN
 memory
 _msan
+POLYSQUARE
 sanitization
 sanitizer
 sanitizers
