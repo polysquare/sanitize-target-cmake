@@ -19,8 +19,7 @@ set (SANITIZERS_USE_MSAN ON CACHE FORCE "")
 set (SANITIZERS_USE_TSAN ON CACHE FORCE "")
 set (SANITIZERS_USE_UBSAN ON CACHE FORCE "")
 
-include ("cmake/cmake-unit/CMakeUnitRunner")
-include ("cmake/cmake-unit/CMakeUnit")
+include ("cmake/cmake-module-common/Common" OPTIONAL)
 include (SanitizeTarget)
 
 # If SANITIZERS_USE_ASAN is set to ON and include (SanitizeTarget)
@@ -438,12 +437,17 @@ function (psq_test_sanitizers_not_supported)
 
 endfunction ()
 
-cmake_unit_init (NAMESPACE psq
-                 COVERAGE_FILES
-                 "${CMAKE_CURRENT_LIST_DIR}/SanitizeTarget.cmake")
+set (CMAKE_FILES
+     "${CMAKE_CURRENT_LIST_DIR}/SanitizeTarget.cmake"
+     "${CMAKE_CURRENT_LIST_DIR}/CMakeLists.txt")
+set (MARKDOWN_FILES
+     "${CMAKE_CURRENT_LIST_DIR}/LICENCE.md"
+     "${CMAKE_CURRENT_LIST_DIR}/README.md")
 
-if (BIICODE)
+if (COMMAND cmake_module_add_common_targets)
 
-    add_bii_targets ()
+    cmake_module_add_common_targets (NAMESPACE "psq"
+                                     CMAKE_FILES ${CMAKE_FILES}
+                                     DOCUMENTATION_FILES ${MARKDOWN_FILES})
 
 endif ()

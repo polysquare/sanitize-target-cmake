@@ -12,10 +12,17 @@ class SanitizeTargetCMakeConan(ConanFile):
     requires = ("cmake-include-guard/master@smspillaz/cmake-include-guard",
                 "cmake-multi-targets/master@smspillaz/cmake-multi-targets",
                 "tooling-cmake-util/master@smspillaz/tooling-cmake-util",
-                "cmake-unit/master@smspillaz/cmake-unit",
                 "sanitizers-cmake/0.0.1@smspillaz/sanitizers-cmake")
     url = "http://github.com/polysquare/sanitize-target-cmake"
     license = "MIT"
+    options = {
+        "dev": [True, False]
+    }
+    default_options = "dev=False"
+
+    def requirements(self):
+        if self.options.dev:
+            self.requires("cmake-module-common/master@smspillaz/cmake-module-common")
 
     def source(self):
         zip_name = "sanitize-target-cmake.zip"
